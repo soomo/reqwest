@@ -256,7 +256,13 @@
     function success (resp) {
       // use global data filter on response text
       var filteredResponse = globalSetupOptions.dataFilter(resp.responseText, type)
-        , r = resp.responseText = filteredResponse
+        , r = filteredResponse
+
+      // FF 3.6 reports that resp only has a 'responseText' getter
+      try {
+        resp.responseText = filteredResponse
+      } catch(err) { }
+
       if (r) {
         switch (type) {
         case 'json':
