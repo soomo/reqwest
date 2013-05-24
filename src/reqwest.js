@@ -134,10 +134,13 @@
       script.htmlFor = script.id = '_reqwest_' + reqId
     }
 
+    var self = this
+
     script.onload = script.onreadystatechange = function () {
       if ((script[readyState] && script[readyState] !== 'complete' && script[readyState] !== 'loaded') || loaded) {
         return false
       }
+      o.timeout && clearTimeout(self.timeout)
       script.onload = script.onreadystatechange = null
       script.onclick && script.onclick()
       // Call the user callback with the last value stored and clean up values and scripts.
@@ -179,7 +182,7 @@
       data = null
     }
 
-    if (o.type == 'jsonp') return handleJsonp(o, fn, err, url)
+    if (o.type == 'jsonp') return handleJsonp.call(this, o, fn, err, url)
 
     http = xhr()
     http.open(method, url, o.async === false ? false : true)

@@ -312,6 +312,26 @@
           }
       })
     })
+
+    test('Clears timeout if response arrives', function (complete) {
+      ajax({
+          url: '/tests/none.jsonp'
+        , type: 'jsonp'
+        , data: { echo: true }
+        , timeout: 250
+        , success: function (resp) {
+            ok(resp && resp.query, 'received response from echo callback')
+            setTimeout(function() {
+              ok(true, 'error callback not called')
+              complete()
+            } , 500)
+          }
+        , error: function (resp, reason) {
+            ok(false, 'error callback called - ' + reason)
+            complete()
+          }
+      })
+    })
   })
 
   sink('Callbacks', function (test, ok) {
