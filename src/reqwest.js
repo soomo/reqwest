@@ -16,6 +16,7 @@
     , callbackPrefix = 'reqwest_' + (+new Date())
     , lastValue // data stored by the most recent JSONP callback
     , xmlHttpRequest = 'XMLHttpRequest'
+    , xDomainRequest = 'XDomainRequest'
     , noop = function () {}
 
     , isArray = typeof Array.isArray == 'function'
@@ -44,6 +45,11 @@
         : function () {
             return new ActiveXObject('Microsoft.XMLHTTP')
           }
+
+    , xdr = function() {
+          return new XDomainRequest()
+        }
+
     , globalSetupOptions = {
         dataFilter: function (data) {
           return data
@@ -165,6 +171,22 @@
     }
   }
 
+  function handleXdr(o, fn, err, url, data) {
+    var http = xdr();
+
+    if (o.timeout) http.timeout = o.timeout
+
+    http.onerror = function () { err({}, 'Request is aborted: reason unknown', {}) }
+    http.ontimeout = function () { err({}, 'Request is aborted: timeout', {}) }
+    http.onprogress = noop
+    http.onload = function () { fn(http) }
+
+    http.open(o.method, url)
+    http.send(data)
+
+    return http
+  }
+
   function getRequest(fn, err) {
     var o = this.o
       , method = (o.method || 'GET').toUpperCase()
@@ -183,6 +205,7 @@
     }
 
     if (o.type == 'jsonp') return handleJsonp.call(this, o, fn, err, url)
+    if (o.crossOrigin && win[xDomainRequest]) return handleXdr.call(this, o, fn, err, url, data)
 
     http = xhr()
     http.open(method, url, o.async === false ? false : true)
