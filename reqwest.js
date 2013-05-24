@@ -56,6 +56,13 @@
         }
       }
 
+  function ready(request, success, error) {
+    if (twoHundo.test(request.status))
+      success(request)
+    else
+      error(request)
+  }
+
   function handleReadyState(r, success, error) {
     return function () {
       // use _aborted to mitigate against IE err c00c023f
@@ -63,10 +70,7 @@
       if (r._aborted) return error(r.request)
       if (r.request && r.request[readyState] == 4) {
         r.request.onreadystatechange = noop
-        if (twoHundo.test(r.request.status))
-          success(r.request)
-        else
-          error(r.request)
+        ready(r.request, success, error)
       }
     }
   }
@@ -187,9 +191,18 @@
     http.open(method, url, o.async === false ? false : true)
     setHeaders(http, o)
     setCredentials(http, o)
-    http.onreadystatechange = handleReadyState(this, fn, err)
+
+    if (o.async !== false) {
+      http.onreadystatechange = handleReadyState(this, fn, err)
+    }
+
     o.before && o.before(http)
     http.send(data)
+
+    if (o.async === false) {
+      ready(http, fn, err)
+    }
+
     return http
   }
 

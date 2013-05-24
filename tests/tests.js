@@ -322,6 +322,12 @@
       , url: '/tests/fixtures/fixtures.json'
       , type: 'json'
       , async: false
+      , success: function () {
+          ok(true, 'called success')
+        }
+      , complete: function () {
+          ok(true, 'called complete')
+        }
       })
       ok(eval('(' + r.request.response + ')').boosh == 'boosh', 'can make sync calls')
       done()
