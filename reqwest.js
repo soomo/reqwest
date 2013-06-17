@@ -211,7 +211,7 @@
     }
 
     if (o.type == 'jsonp') return handleJsonp.call(this, o, fn, err, url)
-    if (o.crossOrigin && win[xDomainRequest]) return handleXdr.call(this, o, fn, err, url, data)
+    if (o.crossOrigin && win[xDomainRequest] && !(new XMLHttpRequest().withCredentials)) return handleXdr.call(this, o, fn, err, url, data)
 
     http = xhr()
     http.open(method, url, o.async === false ? false : true)
